@@ -1,15 +1,20 @@
 var Assets = {
     TextureFleets: new ex.Texture("/Content/Images/spaceship.png")
 };
-var __extends = (this && this.__extends) || function (d, b) {
-    for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p];
-    function __() { this.constructor = d; }
-    d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
-};
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = Object.setPrototypeOf ||
+        ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+        function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var Chart = (function (_super) {
     __extends(Chart, _super);
     function Chart() {
-        _super.apply(this, arguments);
+        return _super !== null && _super.apply(this, arguments) || this;
     }
     Chart.prototype.update = function (engine, delta) {
         _super.prototype.update.call(this, engine, delta);
@@ -35,7 +40,7 @@ var Chart = (function (_super) {
         ctx.stroke();
     };
     return Chart;
-})(ex.Actor);
+}(ex.Actor));
 var Config = {
     MapPadding: 50,
     MapSize: 400,
@@ -64,12 +69,14 @@ var Config = {
 var Planet = (function (_super) {
     __extends(Planet, _super);
     function Planet(planet) {
+        var _this = this;
         var p = GameSession.mapServerCoordsToWorld(planet.position);
         var s = GameSession.mapPlanetSize(planet.growthRate);
-        _super.call(this, p.x, p.y, s, s);
-        this._planetColor = Config.PlanetNeutralColor;
-        this._initialShips = planet.numberOfShips;
-        this.updateState(planet);
+        _this = _super.call(this, p.x, p.y, s, s) || this;
+        _this._planetColor = Config.PlanetNeutralColor;
+        _this._initialShips = planet.numberOfShips;
+        _this.updateState(planet);
+        return _this;
     }
     Planet.prototype.getServerCoord = function () {
         return new ex.Point(this._planet.position.x, this._planet.position.y);
@@ -111,20 +118,21 @@ var Planet = (function (_super) {
         ctx.fill();
     };
     return Planet;
-})(ex.Actor);
+}(ex.Actor));
 var Fleet = (function (_super) {
     __extends(Fleet, _super);
     function Fleet(sp, dp, anim, ships) {
-        _super.call(this, sp.x, sp.y, Config.FleetWidth, Config.FleetHeight);
-        this._v1 = new ex.Vector(0, 0);
-        this._v2 = new ex.Vector(0, 0);
-        this.addDrawing('default', anim);
-        this._ships = ships;
-        this._dest = dp;
+        var _this = _super.call(this, sp.x, sp.y, Config.FleetWidth, Config.FleetHeight) || this;
+        _this._v1 = new ex.Vector(0, 0);
+        _this._v2 = new ex.Vector(0, 0);
+        _this.addDrawing('default', anim);
+        _this._ships = ships;
+        _this._dest = dp;
         var spsc = sp.getServerCoord();
         var dpsc = dp.getServerCoord();
-        this._turns = Math.ceil(Math.sqrt(Math.pow(dpsc.x - spsc.x, 2) +
+        _this._turns = Math.ceil(Math.sqrt(Math.pow(dpsc.x - spsc.x, 2) +
             Math.pow(dpsc.y - spsc.y, 2)));
+        return _this;
     }
     Fleet.create = function (fleet) {
         var sp = GameSession.getPlanet(fleet.sourcePlanetId);
@@ -158,7 +166,7 @@ var Fleet = (function (_super) {
         this.moveBy(this._dest.x, this._dest.y, GameSession.getTurnDuration() * this._turns).asPromise().then(function () { return _this.kill(); });
     };
     return Fleet;
-})(ex.Actor);
+}(ex.Actor));
 var GameSession = (function () {
     function GameSession() {
     }
@@ -253,15 +261,16 @@ var GameSession = (function () {
     GameSession.getTurnDuration = function () {
         return GameSession.State.playerTurnLength;
     };
-    GameSession._planets = [];
-    GameSession._fleets = [];
     return GameSession;
-})();
+}());
+GameSession._planets = [];
+GameSession._fleets = [];
 var Starfield = (function (_super) {
     __extends(Starfield, _super);
     function Starfield() {
-        _super.call(this, 0, 0, 0, 0);
-        this._stars = [];
+        var _this = _super.call(this, 0, 0, 0, 0) || this;
+        _this._stars = [];
+        return _this;
     }
     Starfield.prototype.onInitialize = function () {
         var _this = this;
@@ -296,10 +305,10 @@ var Starfield = (function (_super) {
     };
     Starfield.prototype.draw = function (ctx, delta) {
         for (var i = 0; i < this._stars.length; i++) {
-            ctx.fillStyle = ex.Color.fromRGB(255, 255, 255, this._stars[i].o);
+            ctx.fillStyle = ex.Color.fromRGB(255, 255, 255, this._stars[i].o).toString();
             ctx.fillRect(this._stars[i].x, this._stars[i].y, 1, 1);
         }
     };
     return Starfield;
-})(ex.Actor);
+}(ex.Actor));
 //# sourceMappingURL=game.js.map
