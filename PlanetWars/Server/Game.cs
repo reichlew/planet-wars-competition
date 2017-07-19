@@ -29,9 +29,9 @@ namespace PlanetWars.Server
         private int _MAXPLANETID = 0;
         private int _MAXFLEETID = 0;
         private int _NUM_PLANETS = 3;
-        public static readonly long START_DELAY = 10000; // 5 seconds
-        public static readonly long PLAYER_TURN_LENGTH = 700; // 200 ms
-        public static readonly long SERVER_TURN_LENGTH = 200; // 200 ms
+        public static readonly long START_DELAY = 30000; // ms
+        public static readonly long PLAYER_TURN_LENGTH = 700; // ms
+        public static readonly long SERVER_TURN_LENGTH = 200; // ms
         public static readonly int MAX_TURN = 200; // default 200 turns
 
         public static bool IsRunningLocally = HttpContext.Current.Request.IsLocal;
@@ -326,18 +326,11 @@ namespace PlanetWars.Server
 
         public void StartDemoAgent(string playerName)
         {
-            var agentTask = Task.Factory.StartNew(() =>
+            var agentTask = Task.Factory.StartNew(async () =>
             {
-                string endpoint = "";
-                if (IsRunningLocally)
-                {
-                    endpoint = "http://localhost:52802";
-                }
-                else {
-                    endpoint = "http://planetwars.azurewebsites.net";
-                }
+                string endpoint = "http://localhost:52802";
                 var sweetDemoAgent = new Agent(playerName, endpoint);
-                sweetDemoAgent.Start().Wait();
+                await sweetDemoAgent.Start();
             });
         }
 
@@ -454,7 +447,13 @@ namespace PlanetWars.Server
                 }
 
                 // Check game over conditions
-                if(!_planets.Any(p => p.OwnerId == 1) || !_planets.Any(p => p.OwnerId == 2))
+                var player1NoPlanets = !_planets.Any(p => p.OwnerId == 1);
+                var player1NoShips = !_fleets.Any(f => f.OwnerId == 1);
+
+                var player2NoPlanet = !_planets.Any(p => p.OwnerId == 2);
+                var player2NoShips = !_fleets.Any(f => f.OwnerId == 2);
+
+                if ((player1NoPlanets && player1NoShips) || (player2NoPlanet && player2NoShips))
                 {
                     // player has won
                     var playerId = _planets.FirstOrDefault(p => p.OwnerId != -1).OwnerId;
