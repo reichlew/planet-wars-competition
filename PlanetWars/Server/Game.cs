@@ -24,7 +24,7 @@ namespace PlanetWars.Server
 
         // todo planet generation
 
-        private static int _MAXID = 0;
+        private static int _MAXID = 1;
         private int _MAXPLAYERID = 1;
         private int _MAXPLANETID = 0;
         private int _MAXFLEETID = 0;
@@ -324,12 +324,12 @@ namespace PlanetWars.Server
             return result;
         }
 
-        public void StartDemoAgent(string playerName)
+        public void StartDemoAgent(string playerName, int gameId)
         {
             var agentTask = Task.Factory.StartNew(async () =>
             {
                 string endpoint = "http://localhost:52802";
-                var sweetDemoAgent = new Agent(playerName, endpoint);
+                var sweetDemoAgent = new Agent(playerName, endpoint, gameId);
                 await sweetDemoAgent.Start();
             });
         }
