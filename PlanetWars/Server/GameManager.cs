@@ -71,7 +71,6 @@ namespace PlanetWars.Server
                 game = GetNewGame();
                 game.Waiting = true;
                 game.Start();
-                game.StartDemoAgent("Demo");
                 return game.LogonPlayer(request.AgentName);
             }            
         }
