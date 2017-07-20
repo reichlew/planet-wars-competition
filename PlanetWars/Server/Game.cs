@@ -49,7 +49,10 @@ namespace PlanetWars.Server
         public ConcurrentDictionary<string, Player> AuthTokens = new ConcurrentDictionary<string, Player>();
 
         private List<Planet> _planets = new List<Planet>();
+        private IEnumerable<Planet> Planets => _planets.ToList();
+
         private List<Fleet> _fleets = new List<Fleet>();
+        private IEnumerable<Fleet> Fleets => _fleets.ToList();
 
         public List<int> PlayerAScoreOverTime = new List<int>();
         public List<int> PlayerBScoreOverTime = new List<int>();
@@ -202,7 +205,7 @@ namespace PlanetWars.Server
             var sourceValid = validSourcePlanets.FirstOrDefault(p => p.Id == request.SourcePlanetId && request.NumberOfShips <= p.NumberOfShips);
 
             // A planet of the requested destination ID exists
-            var destinationValid = _planets.FirstOrDefault(p => p.Id == request.DestinationPlanetId);
+            var destinationValid = Planets.FirstOrDefault(p => p.Id == request.DestinationPlanetId);
 
 
             if (sourceValid != null && destinationValid != null)
@@ -253,19 +256,18 @@ namespace PlanetWars.Server
 
         }
 
-        private List<Planet> _getPlanetsForPlayer(string authToken)
+        private IEnumerable<Planet> _getPlanetsForPlayer(string authToken)
         {
             var id = _authTokenToId(authToken);
             return _getPlanetsForPlayer(id);
         }
 
-        private List<Planet> _getPlanetsForPlayer(int id)
+        private IEnumerable<Planet> _getPlanetsForPlayer(int id)
         {
-            var planets = _planets.Where(p => p.OwnerId == id).ToList();
-            return planets;
+            return Planets.Where(p => p.OwnerId == id);
         }
 
-        private List<Fleet> _getFleetsForPlayer(string authToken)
+        private IEnumerable<Fleet> _getFleetsForPlayer(string authToken)
         {
             var id = _authTokenToId(authToken);
             return _getFleetsForPlayer(id);
@@ -276,10 +278,9 @@ namespace PlanetWars.Server
             return Players.Values.FirstOrDefault(p => p.Id == id);
         }
 
-        private List<Fleet> _getFleetsForPlayer(int id)
+        private IEnumerable<Fleet> _getFleetsForPlayer(int id)
         {
-            var fleets = _fleets.Where(f => f.OwnerId == id).ToList();
-            return fleets;
+            return Fleets.Where(f => f.OwnerId == id);
         }
 
         private int _getPlayerScore(int id)
@@ -371,7 +372,7 @@ namespace PlanetWars.Server
                 Processing = true;
 
                 // Grow ships on planets
-                foreach (var planet in _planets)
+                foreach (var planet in Planets)
                 {
                     // if the planet is not controlled by neutral update
                     if (planet.OwnerId != -1)
@@ -381,19 +382,19 @@ namespace PlanetWars.Server
                 }
 
                 // Send fleets 
-                foreach (var fleet in _fleets.ToList())
+                foreach (var fleet in Fleets)
                 {
                     // travel 1 unit distance each turn
                     fleet.NumberOfTurnsToDestination--;
                 }               
                
                 // Resolve planet battles
-                foreach(var planet in _planets.ToList())
+                foreach(var planet in Planets)
                 {
                     var combatants = new Dictionary<int, int>();
                     combatants.Add(planet.OwnerId, planet.NumberOfShips);
                     // find fleets destined for this planet
-                    var fleets = _fleets.ToList().Where(f => f.Destination.Id == planet.Id && f.NumberOfTurnsToDestination <= 0).ToList();
+                    var fleets = Fleets.Where(f => f.Destination.Id == planet.Id && f.NumberOfTurnsToDestination <= 0);
                     foreach(var fleet in fleets)
                     {
                         if (combatants.ContainsKey(fleet.OwnerId))
@@ -406,7 +407,7 @@ namespace PlanetWars.Server
                         }
                     }
 
-                    if(fleets.Count <= 0)
+                    if(fleets.Count() <= 0)
                     {
                         continue;
                     }
@@ -447,16 +448,16 @@ namespace PlanetWars.Server
                 }
 
                 // Check game over conditions
-                var player1NoPlanets = !_planets.Any(p => p.OwnerId == 1);
-                var player1NoShips = !_fleets.Any(f => f.OwnerId == 1);
+                var player1NoPlanets = !Planets.Any(p => p.OwnerId == 1);
+                var player1NoShips = !Fleets.Any(f => f.OwnerId == 1);
 
-                var player2NoPlanet = !_planets.Any(p => p.OwnerId == 2);
-                var player2NoShips = !_fleets.Any(f => f.OwnerId == 2);
+                var player2NoPlanet = !Planets.Any(p => p.OwnerId == 2);
+                var player2NoShips = !Fleets.Any(f => f.OwnerId == 2);
 
                 if ((player1NoPlanets && player1NoShips) || (player2NoPlanet && player2NoShips))
                 {
                     // player has won
-                    var playerId = _planets.FirstOrDefault(p => p.OwnerId != -1).OwnerId;
+                    var playerId = Planets.FirstOrDefault(p => p.OwnerId != -1).OwnerId;
                     var player = Players.Values.FirstOrDefault(p => p.Id == playerId);
                     this.Status = $"Player {player.PlayerName} wins";
                     this.GameOver = true;
@@ -504,8 +505,8 @@ namespace PlanetWars.Server
                 EndOfCurrentTurn = endPlayerTurn,
                 PlayerTurnLength = (int)PLAYER_TURN_LENGTH,
                 ServerTurnLength = (int)SERVER_TURN_LENGTH,
-                Planets = _planets.ToList().Select(p => Mapper.Map<Shared.Planet>(p)).ToList(),
-                Fleets = _fleets.ToList().Select(f => Mapper.Map<Shared.Fleet>(f)).ToList(),
+                Planets = Planets.Select(p => Mapper.Map<Shared.Planet>(p)).ToList(),
+                Fleets = Fleets.Select(f => Mapper.Map<Shared.Fleet>(f)).ToList(),
                 PlayerA = 1,
                 PlayerAScore = _getPlayerScore(1),
                 PlayerAScoreOverTime = PlayerAScoreOverTime,
