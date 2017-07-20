@@ -26,9 +26,10 @@ namespace PlanetWars.DemoAgent
         public int LastTurn { get; private set; }
         public int MyId { get; private set; }
 
-        public AgentBase(string name, string endpoint)
+        public AgentBase(string name, string endpoint, int gameId)
         {
             Name = name;
+            GameId = gameId;
             // connect to api and handle gzip compressed messasges
             _client = new HttpClient() { BaseAddress = new Uri(endpoint) };
             _client.DefaultRequestHeaders.Accept.Clear();
