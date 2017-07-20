@@ -32,9 +32,9 @@ namespace PlanetWars.Server
             return game;
         }
 
-        public Game GetWaitingGame()
+        public Game GetWaitingGameById(int gameId)
         {
-            return Games.Values.FirstOrDefault(g => g.Waiting);
+            return Games.Values.Where(g => g.Id == gameId && g.Waiting).FirstOrDefault();
         }
 
         public StatusResult GetGameStatus(int gameId)
@@ -59,9 +59,8 @@ namespace PlanetWars.Server
                        
         public LogonResult Execute(LogonRequest request)
         {
-            // check for waiting games and log players into that
-            var game = GetWaitingGame();
-            if(game != null)
+            var game = GetWaitingGameById(request.GameId);
+            if (game != null)
             {
                 game.Waiting = false;
                 return game.LogonPlayer(request.AgentName);
@@ -71,9 +70,8 @@ namespace PlanetWars.Server
                 game = GetNewGame();
                 game.Waiting = true;
                 game.Start();
-                game.StartDemoAgent("Demo");
                 return game.LogonPlayer(request.AgentName);
-            }            
+            }
         }
                        
         public StatusResult Execute(StatusRequest request)
