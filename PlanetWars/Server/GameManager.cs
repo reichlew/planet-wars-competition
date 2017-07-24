@@ -59,18 +59,33 @@ namespace PlanetWars.Server
                        
         public LogonResult Execute(LogonRequest request)
         {
-            var game = GetWaitingGameById(request.GameId);
-            if (game != null)
+            if (request.GameId == -1)
             {
-                game.Waiting = false;
+                var game = GetNewGame();
+                game.Waiting = true;
+                game.Start();
+                game.StartDemoAgent("CPU", game.Id);
+                return game.LogonPlayer(request.AgentName);
+            }
+            else if (request.GameId == 0)
+            {
+                var game = GetNewGame();
+                game.Waiting = true;
+                game.Start();
                 return game.LogonPlayer(request.AgentName);
             }
             else
             {
-                game = GetNewGame();
-                game.Waiting = true;
-                game.Start();
-                return game.LogonPlayer(request.AgentName);
+                var game = GetWaitingGameById(request.GameId);
+                if (game != null)
+                {
+                    game.Waiting = false;
+                    return game.LogonPlayer(request.AgentName);
+                }
+                else
+                {
+                    return new LogonResult() { Id = request.GameId, Success = false, Message = "The game id specified is not available." };
+                }
             }
         }
                        

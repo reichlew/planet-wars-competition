@@ -53,7 +53,8 @@ namespace PlanetWars.DemoAgent
         {
             var response = await _client.PostAsJsonAsync("api/logon", new LogonRequest()
             {
-                AgentName = Name
+                AgentName = Name,
+                GameId = GameId
             });
             var result = await response.Content.ReadAsAsync<LogonResult>();
             if (!result.Success)
