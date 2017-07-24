@@ -77,8 +77,6 @@ namespace PlanetWars.Server
             }
         }
 
-
-
         public Game()
         {
             if (Random == null)
@@ -300,15 +298,13 @@ namespace PlanetWars.Server
                     Id = _MAXPLAYERID++
                 };
 
-                var success = Players.TryAdd(playerName, newPlayer);
-                var success2 = AuthTokens.TryAdd(newPlayer.AuthToken, newPlayer);
+                var playerAdded = Players.TryAdd(playerName, newPlayer);
+                var authTokenAdded = AuthTokens.TryAdd(newPlayer.AuthToken, newPlayer);
 
-                if (success && success2)
+                if (playerAdded && authTokenAdded)
                 {
-                    System.Diagnostics.Debug.WriteLine("Player logon [{0}]:[{1}]", newPlayer.PlayerName,
-                        newPlayer.AuthToken);
+                    System.Diagnostics.Debug.WriteLine("Player logon [{0}]:[{1}]", newPlayer.PlayerName, newPlayer.AuthToken);
                 }
-
 
                 result.AuthToken = newPlayer.AuthToken;
                 result.Id = newPlayer.Id;
