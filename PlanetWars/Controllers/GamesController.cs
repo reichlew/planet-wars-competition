@@ -54,7 +54,7 @@ namespace PlanetWars.Controllers
             }
             else
             {
-                return BaseResult<LogonResult>.Fail(errors:results.Errors.Select(e => e.ErrorMessage));
+                return BaseResult<LogonResult>.Fail(errors:results.Errors.Select(e => e.ErrorMessage).ToArray());
             }
         }
 
@@ -70,7 +70,7 @@ namespace PlanetWars.Controllers
             }
             else
             {
-                return BaseResult<StatusResult>.Fail(errors: results.Errors.Select(e => e.ErrorMessage));
+                return BaseResult<StatusResult>.Fail(errors: results.Errors.Select(e => e.ErrorMessage).ToArray());
             }
         }
 
@@ -91,7 +91,7 @@ namespace PlanetWars.Controllers
                 }
                 else
                 {
-                    results.Add(BaseResult<MoveResult>.Fail(errors: result.Errors.Select(e => e.ErrorMessage)));
+                    results.Add(BaseResult<MoveResult>.Fail(errors: result.Errors.Select(e => e.ErrorMessage).ToArray()));
                 }
             }
             return results;

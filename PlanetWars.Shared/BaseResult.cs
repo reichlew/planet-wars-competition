@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace PlanetWars.Shared
 {
@@ -10,7 +6,7 @@ namespace PlanetWars.Shared
     {
         public bool Success { get; set; }
         public string Message { get; set; }
-        public IList<string> Errors { get; set; }
+        public string[] Errors { get; set; }
 
         public static BaseResult<T> Succeed()
         {
@@ -21,13 +17,13 @@ namespace PlanetWars.Shared
             };
         }
 
-        public static BaseResult<T> Fail(string message = "Failure", IEnumerable<string> errors = null)
+        public static BaseResult<T> Fail(string message = "Failure", string[] errors = null)
         {
             return new BaseResult<T>()
             {
                 Success = false,
                 Message = message,
-                Errors = errors?.ToList()
+                Errors = errors != null ? errors : null
             };
         }
     }
