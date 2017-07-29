@@ -1,7 +1,5 @@
 ﻿<h2 class="page-header">Active Games</h2>
 <div class="row">
-
-    <div class="alert alert-info">For any issues or questions please use the <a href="https://github.com/eonarheim/planet-wars-competition"><strong>issue tracker</strong></a>, or contact Erik Onarheim or Kamran Ayub</div>
     <div class="col-xs-12">
 
         <div id="no-games" class="alert alert-warning">Waiting for games...</div>
@@ -12,19 +10,25 @@
 @section scripts {
 
     <script type="text/javascript">
-
-        setInterval(function() {
-
-            $.getJSON("/api/games").then(function (games) {
+        var getCurrentGames = function () {
+            $.getJSON("/PlanetWars/api/games").then(function (games) {
                 if (!games || !games.length) return;
 
                 $("#games").empty();
-                $.each(games, function(index, game) {
-                    $("#games").append("<li><a href='/home/game/" + game.gameId + "'>#" + game.gameId + " (" + _.values(game.players).join(",") +")</a></li>");
-                });
+                if (_.some(games)) {
+                    $('#no-games').hide();
+
+                    $.each(games, function (index, game) {
+                        $("#games").append("<li><a href='/PlanetWars/home/game/" + game.gameId + "'>#" + game.gameId + " (" + _.values(game.players).join(",") + ")</a></li>");
+                    });
+                }
             });
+        };
 
-        }, 2000);
+        getCurrentGames();
 
+        setInterval(function() {
+            getCurrentGames();
+        }, 10000);
     </script>
 }

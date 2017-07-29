@@ -7,7 +7,7 @@ namespace CSharpAgent20
 {
     public class Agent : AgentBase
     {
-        public Agent() : base("YOUR_TEAM_NAME", "http://localhost:52802/", -1) { }
+        public Agent() : base("YOUR_TEAM_NAME", "http://localhost/planetwwars/", -1) { }
 
         public override void Update(StatusResult gs)
         {

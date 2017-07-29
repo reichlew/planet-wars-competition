@@ -1,7 +1,7 @@
 ﻿var Assets = {
 
    // tx
-   TextureFleets: new ex.Texture("/Content/Images/spaceship.png")
+   TextureFleets: new ex.Texture("/PlanetWars/Content/Images/spaceship.png")
 
    // snd   
 

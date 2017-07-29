@@ -84,7 +84,7 @@ class GameSession {
 
    static updateSessionState(): JQueryPromise<Server.StatusResult> {
 
-      return $.post("/api/status", { gameId: GameSession.Id }).then(s => {
+      return $.post("/planetwars/api/status", { gameId: GameSession.Id }).then(s => {
          GameSession.State = <Server.StatusResult>s;
 
          if (GameSession.State.currentTurn > 0) {

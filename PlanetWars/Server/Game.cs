@@ -28,7 +28,6 @@ namespace PlanetWars.Server
         private int _MAXPLAYERID = 1;
         private int _MAXPLANETID = 0;
         private int _MAXFLEETID = 0;
-        private int _NUM_PLANETS = 3;
         public static readonly long START_DELAY = 30000; // ms
         public static readonly long PLAYER_TURN_LENGTH = 700; // ms
         public static readonly long SERVER_TURN_LENGTH = 200; // ms
@@ -325,7 +324,7 @@ namespace PlanetWars.Server
         {
             var agentTask = Task.Factory.StartNew(async () =>
             {
-                string endpoint = "http://localhost:52802";
+                string endpoint = "http://localhost/planetwars/";
                 var sweetDemoAgent = new Agent(playerName, endpoint, gameId);
                 await sweetDemoAgent.Start();
             });
@@ -353,6 +352,14 @@ namespace PlanetWars.Server
                     this.Waiting = false;
                 }
                 return;
+            }
+            else
+            {
+                if (Players.Count != 2)
+                {
+                    this.Status = "Nobody joined your game, I guess that means you win.";
+                    GameOver = true;
+                }
             }
 
             if (GameOver)
@@ -450,12 +457,21 @@ namespace PlanetWars.Server
                 var player2NoPlanet = !Planets.Any(p => p.OwnerId == 2);
                 var player2NoShips = !Fleets.Any(f => f.OwnerId == 2);
 
-                if ((player1NoPlanets && player1NoShips) || (player2NoPlanet && player2NoShips))
+                if (player1NoPlanets && player1NoShips)
                 {
-                    // player has won
-                    var playerId = Planets.FirstOrDefault(p => p.OwnerId != -1).OwnerId;
-                    var player = Players.Values.FirstOrDefault(p => p.Id == playerId);
-                    this.Status = $"Player {player.PlayerName} wins";
+                    // player 2 has won
+                    var winner = Players.Values.FirstOrDefault(p => p.Id == 2);
+                    var loser = Players.Values.FirstOrDefault(p => p.Id == 1);
+                    this.Status = $"{winner?.PlayerName} has defeated {loser?.PlayerName}!";
+                    this.GameOver = true;
+                }
+
+                 if (player2NoPlanet && player2NoShips)
+                {
+                    // player 1 has won
+                    var winner = Players.Values.FirstOrDefault(p => p.Id == 1);
+                    var loser = Players.Values.FirstOrDefault(p => p.Id == 2);
+                    this.Status = $"{winner?.PlayerName} has defeated {loser?.PlayerName}!";
                     this.GameOver = true;
                 }
 
@@ -473,20 +489,21 @@ namespace PlanetWars.Server
 
             if (Turn >= MAX_TURN)
             {
+                var player1 = _getPlayerForId(1)?.PlayerName;
+                var player2 = _getPlayerForId(2)?.PlayerName;
+
                 // todo max turn, most ships wins
-                if(_getPlayerScore(1)> _getPlayerScore(2))
+                if (_getPlayerScore(2) > _getPlayerScore(2))
                 {
-                    this.Status = $"Player {_getPlayerForId(1).PlayerName} wins";
+                    this.Status = $"{player1} has defeated {player2}!";
                 }
                 else
                 {
-                    this.Status = $"Player {_getPlayerForId(2).PlayerName} wins";
+                    this.Status = $"{player2} has defeated {player1}!";
                 }
 
                 this.GameOver = true;
-
             }
-
         }
 
         public StatusResult GetStatus(StatusRequest request)
