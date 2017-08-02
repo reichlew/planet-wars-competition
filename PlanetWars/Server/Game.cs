@@ -492,8 +492,7 @@ namespace PlanetWars.Server
                 var player1 = _getPlayerForId(1)?.PlayerName;
                 var player2 = _getPlayerForId(2)?.PlayerName;
 
-                // todo max turn, most ships wins
-                if (_getPlayerScore(2) > _getPlayerScore(2))
+                if (_getPlayerScore(1) > _getPlayerScore(2))
                 {
                     this.Status = $"{player1} has defeated {player2}!";
                 }
