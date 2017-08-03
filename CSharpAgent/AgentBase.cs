@@ -96,7 +96,14 @@ namespace CSharpAgent
             var results = await response.Content.ReadAsAsync<List<MoveResult>>();
             foreach (var result in results)
             {
-                Console.WriteLine(result.Message);
+                if (result.Message == "Failure")
+                {
+                    Console.WriteLine($"Error talking to server: {result.Message}, {string.Join(",", result.Errors)}");
+                }
+                else
+                {
+                    Console.WriteLine(result.Message);
+                }
             }            
             return results;
         }
