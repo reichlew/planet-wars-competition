@@ -492,7 +492,14 @@ namespace PlanetWars.Server
                 var player1 = _getPlayerForId(1)?.PlayerName;
                 var player2 = _getPlayerForId(2)?.PlayerName;
 
-                if (_getPlayerScore(1) > _getPlayerScore(2))
+                var player1Score = _getPlayerScore(1);
+                var player2Score = _getPlayerScore(2);
+
+                if (player1Score == player2Score)
+                {
+                    this.Status = $"{player1} has tied {player2}!";
+                }
+                else if (player1Score > player2Score)
                 {
                     this.Status = $"{player1} has defeated {player2}!";
                 }
