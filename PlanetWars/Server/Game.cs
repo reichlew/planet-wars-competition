@@ -28,6 +28,7 @@ namespace PlanetWars.Server
         private int _MAXPLAYERID = 1;
         private int _MAXPLANETID = 0;
         private int _MAXFLEETID = 0;
+        
         public static readonly long START_DELAY = 30000; // ms
         public static readonly long PLAYER_TURN_LENGTH = 700; // ms
         public static readonly long SERVER_TURN_LENGTH = 200; // ms
@@ -456,7 +457,7 @@ namespace PlanetWars.Server
 
                 var player2NoPlanet = !Planets.Any(p => p.OwnerId == 2);
                 var player2NoShips = !Fleets.Any(f => f.OwnerId == 2);
-
+                
                 if (player1NoPlanets && player1NoShips)
                 {
                     // player 2 has won
