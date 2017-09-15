@@ -1,23 +1,24 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Net.Http;
-using System.Net.Http.Headers;
-using System.Threading.Tasks;
+using System.Net;
+using System.Threading;
+using Newtonsoft.Json;
 using PlanetWars.Shared;
 
-namespace CSharpAgent
+namespace CSharpAgent20
 {
     public class AgentBase
     {
         private bool _isRunning = false;
-        private readonly HttpClient _client = null;
+        private readonly WebClient _client = null;
+        private readonly string _endpoint;
 
         private List<MoveRequest> _pendingMoveRequests = new List<MoveRequest>();
 
         protected long TimeToNextTurn { get; set; }
         protected int CurrentTurn { get; set; }
         protected int GameId { get; set; }
-
+        
         // string guid that acts as an authorization token, definitely not crypto secure
         public string AuthToken { get; set; }
         public string Name { get; set; }
@@ -27,11 +28,10 @@ namespace CSharpAgent
         public AgentBase(string name, string endpoint, int gameId)
         {
             Name = name;
+            _endpoint = endpoint;
             GameId = gameId;
 
-            _client = new HttpClient() { BaseAddress = new Uri(endpoint) };
-            _client.DefaultRequestHeaders.Accept.Clear();
-            _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+            _client = new WebClient();
         }
 
         public void SendFleet(int sourcePlanetId, int destinationPlanetId, int numShips)
@@ -47,18 +47,21 @@ namespace CSharpAgent
             _pendingMoveRequests.Add(moveRequest);
         }
 
-        protected async Task<LogonResult> Logon()
+        protected LogonResult Logon()
         {
-            var response = await _client.PostAsJsonAsync("api/logon", new LogonRequest()
+            var request = new LogonRequest()
             {
                 AgentName = Name,
                 GameId = GameId
-            });
+            };
 
-            var result = await response.Content.ReadAsAsync<LogonResult>();
+            _client.Headers[HttpRequestHeader.ContentType] = "application/json";
+            var htmlResult = _client.UploadString(string.Concat(_endpoint, "api/logon"), JsonConvert.SerializeObject(request));
+            var result = JsonConvert.DeserializeObject<LogonResult>(htmlResult);
+
             if (!result.Success)
             {
-                Console.WriteLine($"Error talking to server: {result.Message}, {string.Join(",", result.Errors)}");
+                Console.WriteLine(string.Format("Error talking to server: {0}, {1}", result.Message, string.Join(",", result.Errors)));
                 throw new Exception("Could not talk to sever");
             }
 
@@ -66,34 +69,39 @@ namespace CSharpAgent
             GameId = result.GameId;
             MyId = result.Id;
             TimeToNextTurn = (long)result.GameStart.Subtract(DateTime.UtcNow).TotalMilliseconds;
-            Console.WriteLine($"Logged in as {Name}: Game Id {result.GameId} starts in {TimeToNextTurn}ms");
+            Console.WriteLine(string.Format("Logged in as {0}: Game Id {1} starts in {2}ms", Name, result.GameId, TimeToNextTurn));
             return result;
         }
 
-        protected async Task<StatusResult> UpdateGameState()
+        protected StatusResult UpdateGameState()
         {
-            var response = await _client.PostAsJsonAsync("api/status", new StatusRequest()
+            var request = new StatusRequest()
             {
                 GameId = GameId
-            });
+            };
 
-            var result = await response.Content.ReadAsAsync<StatusResult>();
+            _client.Headers[HttpRequestHeader.ContentType] = "application/json";
+            var htmlResult = _client.UploadString(string.Concat(_endpoint, "api/status"), JsonConvert.SerializeObject(request));
+            var result = JsonConvert.DeserializeObject<StatusResult>(htmlResult);
+
             if (!result.Success)
             {
-                Console.WriteLine($"Error talking to server: {result.Message}, {string.Join(",", result.Errors)}");
+                Console.WriteLine(string.Format("Error talking to server: {0}, {1}", result.Message, string.Join(",", result.Errors)));
                 throw new Exception("Could not talk to sever");
             }
 
             TimeToNextTurn = (long)result.NextTurnStart.Subtract(DateTime.UtcNow).TotalMilliseconds;
             CurrentTurn = result.CurrentTurn;
-            Console.WriteLine($"Next turn in {TimeToNextTurn}ms");
+            Console.WriteLine(string.Format("Next turn in {0}ms", TimeToNextTurn));
             return result;
         }
 
-        protected async Task<List<MoveResult>> SendUpdate(List<MoveRequest> moveCommands)
+        protected List<MoveResult> SendUpdate(List<MoveRequest> moveCommands)
         {
-            var response = await _client.PostAsJsonAsync("api/move", moveCommands);
-            var results = await response.Content.ReadAsAsync<List<MoveResult>>();
+            _client.Headers[HttpRequestHeader.ContentType] = "application/json";
+            var htmlResult = _client.UploadString(string.Concat(_endpoint, "api/move"), JsonConvert.SerializeObject(moveCommands));
+            var results = JsonConvert.DeserializeObject<List<MoveResult>>(htmlResult);
+
             foreach (var result in results)
             {
                 if (result.Message == "Failure")
@@ -104,13 +112,13 @@ namespace CSharpAgent
                 {
                     Console.WriteLine(result.Message);
                 }
-            }            
+            }
             return results;
         }
 
-        public async Task Start()
+        public void Start()
         {
-            await Logon();
+            Logon();
             if (!_isRunning)
             {
                 _isRunning = true;
@@ -118,10 +126,10 @@ namespace CSharpAgent
                 {
                     if (TimeToNextTurn > 0)
                     {
-                        await Task.Delay((int)(TimeToNextTurn));
+                        Thread.Sleep((int)(TimeToNextTurn));
                     }
 
-                    var gs = await UpdateGameState();
+                    var gs = UpdateGameState();
                     if (gs.IsGameOver)
                     {
                         _isRunning = false;
@@ -132,7 +140,7 @@ namespace CSharpAgent
                     }
 
                     Update(gs);
-                    var ur = await SendUpdate(this._pendingMoveRequests);
+                    var ur = SendUpdate(this._pendingMoveRequests);
                     this._pendingMoveRequests.Clear();
                 }
             }

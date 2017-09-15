@@ -53,7 +53,8 @@ namespace PlanetWars.DemoAgent
         {
             var response = await _client.PostAsJsonAsync("api/logon", new LogonRequest()
             {
-                AgentName = Name
+                AgentName = Name,
+                GameId = GameId
             });
             var result = await response.Content.ReadAsAsync<LogonResult>();
             if (!result.Success)
@@ -106,6 +107,10 @@ namespace PlanetWars.DemoAgent
                 _isRunning = true;
                 while (_isRunning)
                 {
+                    if (TimeToNextTurn > 0)
+                    {
+                        await Task.Delay((int)(TimeToNextTurn));
+                    }
 
                     var gs = await UpdateGameState();
                     if (gs.IsGameOver)
@@ -120,10 +125,6 @@ namespace PlanetWars.DemoAgent
                     Update(gs);
                     var ur = await SendUpdate(this._pendingMoveRequests);
                     this._pendingMoveRequests.Clear();
-                    if (TimeToNextTurn > 0)
-                    {
-                        await Task.Delay((int)(TimeToNextTurn));
-                    }
                 }
             }
         }

@@ -8,7 +8,7 @@ namespace PlanetWars.Models
     public class GameSession
     {
         public int GameId { get; set; }
-
         public IDictionary<int, string> Players { get; set; }
+        public bool GameOver { get; set; }
     }
 }

@@ -30,7 +30,8 @@ namespace PlanetWars.Controllers
                 yield return new GameSession()
                 {
                     GameId = game.Key,
-                    Players = game.Value.Players.ToDictionary(kv => kv.Value.Id, kv => kv.Value.PlayerName)
+                    Players = game.Value.Players.ToDictionary(kv => kv.Value.Id, kv => kv.Value.PlayerName),
+                    GameOver = game.Value.GameOver
                 };
             }
         }
@@ -54,7 +55,7 @@ namespace PlanetWars.Controllers
             }
             else
             {
-                return BaseResult<LogonResult>.Fail(errors:results.Errors.Select(e => e.ErrorMessage));
+                return BaseResult<LogonResult>.Fail(errors:results.Errors.Select(e => e.ErrorMessage).ToArray());
             }
         }
 
@@ -70,7 +71,7 @@ namespace PlanetWars.Controllers
             }
             else
             {
-                return BaseResult<StatusResult>.Fail(errors: results.Errors.Select(e => e.ErrorMessage));
+                return BaseResult<StatusResult>.Fail(errors: results.Errors.Select(e => e.ErrorMessage).ToArray());
             }
         }
 
@@ -91,7 +92,7 @@ namespace PlanetWars.Controllers
                 }
                 else
                 {
-                    results.Add(BaseResult<MoveResult>.Fail(errors: result.Errors.Select(e => e.ErrorMessage)));
+                    results.Add(BaseResult<MoveResult>.Fail(errors: result.Errors.Select(e => e.ErrorMessage).ToArray()));
                 }
             }
             return results;

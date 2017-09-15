@@ -1,5 +1,5 @@
 var Assets = {
-    TextureFleets: new ex.Texture("/Content/Images/spaceship.png")
+    TextureFleets: new ex.Texture("/PlanetWars/Content/Images/spaceship.png")
 };
 var __extends = (this && this.__extends) || (function () {
     var extendStatics = Object.setPrototypeOf ||
@@ -212,7 +212,7 @@ var GameSession = (function () {
         return new ex.Point(x, y);
     };
     GameSession.updateSessionState = function () {
-        return $.post("/api/status", { gameId: GameSession.Id }).then(function (s) {
+        return $.post("/planetwars/api/status", { gameId: GameSession.Id }).then(function (s) {
             GameSession.State = s;
             if (GameSession.State.currentTurn > 0) {
                 $("#game-turns span").text(GameSession.State.currentTurn);
