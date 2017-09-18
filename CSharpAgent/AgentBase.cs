@@ -17,19 +17,22 @@ namespace CSharpAgent
         protected long TimeToNextTurn { get; set; }
         protected int CurrentTurn { get; set; }
         protected int GameId { get; set; }
+        protected MapGenerationOption MapGeneration { get; set; }
 
         // string guid that acts as an authorization token, definitely not crypto secure
         public string AuthToken { get; set; }
+
         public string Name { get; set; }
         public int LastTurn { get; private set; }
         public int MyId { get; private set; }
 
-        public AgentBase(string name, string endpoint, int gameId)
+        public AgentBase(string name, int gameId, MapGenerationOption mapGeneration)
         {
             Name = name;
             GameId = gameId;
+            MapGeneration = mapGeneration;
 
-            _client = new HttpClient() { BaseAddress = new Uri(endpoint) };
+            _client = new HttpClient() { BaseAddress = new Uri("http://localhost/PlanetWars/") };
             _client.DefaultRequestHeaders.Accept.Clear();
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
@@ -52,7 +55,8 @@ namespace CSharpAgent
             var response = await _client.PostAsJsonAsync("api/logon", new LogonRequest()
             {
                 AgentName = Name,
-                GameId = GameId
+                GameId = GameId,
+                MapGeneration = MapGeneration
             });
 
             var result = await response.Content.ReadAsAsync<LogonResult>();
@@ -104,7 +108,7 @@ namespace CSharpAgent
                 {
                     Console.WriteLine(result.Message);
                 }
-            }            
+            }
             return results;
         }
 

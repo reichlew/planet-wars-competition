@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.16
+VisualStudioVersion = 15.0.26730.15
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanetWars", "PlanetWars\PlanetWars.csproj", "{D672CCB8-8F6C-4858-A815-66E1707DF6FD}"
 EndProject
@@ -17,8 +17,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpAgent", "CSharpAgent\CSharpAgent.csproj", "{5B3502F0-DB70-4052-A871-B44684E5DFD7}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanetWars.Shared", "PlanetWars.Shared\PlanetWars.Shared.csproj", "{DCFFF982-65A4-478B-AD3C-F22609BC5FDE}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpAgent20", "CSharpAgent20\CSharpAgent20.csproj", "{4303B037-314D-4342-A481-25697235A1A2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -42,12 +40,11 @@ Global
 		{DCFFF982-65A4-478B-AD3C-F22609BC5FDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DCFFF982-65A4-478B-AD3C-F22609BC5FDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DCFFF982-65A4-478B-AD3C-F22609BC5FDE}.Release|Any CPU.Build.0 = Release|Any CPU
-		{4303B037-314D-4342-A481-25697235A1A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{4303B037-314D-4342-A481-25697235A1A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{4303B037-314D-4342-A481-25697235A1A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{4303B037-314D-4342-A481-25697235A1A2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {54BD683E-F32A-44C1-91DC-ED662CE8C990}
 	EndGlobalSection
 EndGlobal

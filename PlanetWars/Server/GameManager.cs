@@ -1,9 +1,9 @@
-﻿using PlanetWars.Shared;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PlanetWars.Shared;
 
 namespace PlanetWars.Server
 {
@@ -25,9 +25,9 @@ namespace PlanetWars.Server
             }
         }
 
-        public Game GetNewGame()
+        public Game GetNewGame(LogonRequest request)
         {
-            var game = new Game();
+            var game = new Game(request.MapGeneration);
             Games.Add(game.Id, game);
             return game;
         }
@@ -39,10 +39,11 @@ namespace PlanetWars.Server
 
         public StatusResult GetGameStatus(int gameId)
         {
-            if (!Games.ContainsKey(gameId)) {
+            if (!Games.ContainsKey(gameId))
+            {
                 return null;
             }
-            var game = Games[gameId];            
+            var game = Games[gameId];
             var result = game.GetStatus(null);
             return result;
         }
@@ -56,20 +57,28 @@ namespace PlanetWars.Server
         {
             return Games.Values.Where(g => g.Running == true || g.GameOver == true).ToList();
         }
-                       
+
         public LogonResult Execute(LogonRequest request)
         {
-            if (request.GameId == -1)
+            if (request.GameId == -2)
             {
-                var game = GetNewGame();
+                var game = GetNewGame(request);
                 game.Waiting = true;
                 game.Start();
-                game.StartDemoAgent("CPU", game.Id);
+                game.StartDemoAgent("Advanced CPU", game.Id, true);
+                return game.LogonPlayer(request.AgentName);
+            }
+            else if (request.GameId == -1)
+            {
+                var game = GetNewGame(request);
+                game.Waiting = true;
+                game.Start();
+                game.StartDemoAgent("CPU", game.Id, false);
                 return game.LogonPlayer(request.AgentName);
             }
             else if (request.GameId == 0)
             {
-                var game = GetNewGame();
+                var game = GetNewGame(request);
                 game.Waiting = true;
                 game.Start();
                 return game.LogonPlayer(request.AgentName);
@@ -88,7 +97,7 @@ namespace PlanetWars.Server
                 }
             }
         }
-                       
+
         public StatusResult Execute(StatusRequest request)
         {
             var game = Games[request.GameId];

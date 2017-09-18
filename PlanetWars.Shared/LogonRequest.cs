@@ -4,5 +4,6 @@
     {
         public string AgentName { get; set; }
         public int GameId { get; set; }
+        public MapGenerationOption MapGeneration { get; set; }
     }
 }

@@ -1,12 +1,10 @@
-﻿using AutoMapper;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
-using PlanetWars.Server;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Web;
+using AutoMapper;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using PlanetWars.Server;
 
 namespace PlanetWars.Tests
 {
@@ -47,12 +45,10 @@ namespace PlanetWars.Tests
                 dest => dest.SourcePlanetId,
                 opt => opt.MapFrom(src => src.Source.Id)).IgnoreAllNonExisting();
 
-
             Mapper.AssertConfigurationIsValid();
 
-
-            game = new Game();
-            // start engine at 0 ticks 
+            game = new Game(Shared.MapGenerationOption.Basic);
+            // start engine at 0 ticks
             startTime = new DateTime(0);
             game.UpdateTimeInfo(startTime);
             p1Logon = game.LogonPlayer("p1");
@@ -86,20 +82,19 @@ namespace PlanetWars.Tests
                 },
             };
             game.SetPlanets(planets);
-
         }
 
         [TestMethod]
         public void TestGameExists()
         {
-            var game = new Game();
+            var game = new Game(Shared.MapGenerationOption.Basic);
             Assert.IsNotNull(game, "Game should exist");
         }
 
         [TestMethod]
         public void TestPlayersCanLogon()
         {
-            var game = new Game();
+            var game = new Game(Shared.MapGenerationOption.Basic);
             var p1logon = game.LogonPlayer("p1");
 
             Assert.IsTrue(p1logon.Success, "p1 should be able to logon");
@@ -111,7 +106,6 @@ namespace PlanetWars.Tests
         [TestMethod]
         public void TestPlayerCanColonizePlanet()
         {
-           
             var moveResult = game.MoveFleet(new Shared.MoveRequest()
             {
                 AuthToken = p1Logon.AuthToken,
@@ -133,13 +127,11 @@ namespace PlanetWars.Tests
             Assert.AreEqual(0, game.GetFleets().Count, "Fleet should have arrived and been removed");
             Assert.AreEqual(1, planets[1].NumberOfShips, "Planet should have 1 ship on it after colonization");
             Assert.AreEqual(p1Logon.Id, planets[1].OwnerId, "Planet should be owned by player 1");
-            
         }
 
         [TestMethod]
         public void Test3ForcesColonizingPlanetP1HasMore()
         {
-            
             // P1 moves fleets
             var p1MoveResult = game.MoveFleet(new Shared.MoveRequest()
             {
@@ -159,8 +151,6 @@ namespace PlanetWars.Tests
                 SourcePlanetId = 2
             });
 
-
-
             // Move result should be valid
             Assert.IsTrue(p1MoveResult.Success, "Valid move result should succeed");
             Assert.IsTrue(p2MoveResult.Success, "Valid move result should succeed");
@@ -177,7 +167,6 @@ namespace PlanetWars.Tests
             Assert.AreEqual(1, planets[1].NumberOfShips, "Planet should have 1 ship on it after colonization");
             Assert.AreEqual(p1Logon.Id, planets[1].OwnerId, "Planet should be owned by player 1");
         }
-        
 
         [TestMethod]
         public void TestFleetArrivesWhenItShould()
@@ -211,7 +200,6 @@ namespace PlanetWars.Tests
             Assert.AreEqual(0, game.GetFleets().Count, "Fleets should have arrived");
             Assert.AreEqual(0, planets[2].NumberOfShips, "Planet should should have no ship");
             Assert.AreEqual(p2Logon.Id, planets[2].OwnerId, "Planet should be owned by player 2 still");
-
         }
 
         [TestMethod]
@@ -229,17 +217,15 @@ namespace PlanetWars.Tests
 
             Assert.IsFalse(p1MoveResult.Success);
         }
-        
+
         [TestMethod]
         public void CheckPlayerWinsWhenAllOtherPlanetsTaken()
         {
-
         }
 
         [TestMethod]
         public void CheckDrawWhenBothPlayersWithoutShips()
         {
-
         }
     }
 }

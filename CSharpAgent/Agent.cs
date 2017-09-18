@@ -6,13 +6,17 @@ namespace CSharpAgent
 {
     public class Agent : AgentBase
     {
-        public Agent() : base("YOUR_TEAM_NAME", "http://localhost/planetwars/", -1){}
+        private const string TeamName = "YOUR_TEAM_NAME";
+
+        public Agent(int gameId, MapGenerationOption mapGeneration) : base(TeamName, gameId, mapGeneration)
+        {
+        }
 
         public override void Update(StatusResult gs)
         {
             // do cool ai stuff
             Console.WriteLine($"[{DateTime.Now.ToShortTimeString()}]Current Turn: {gs.CurrentTurn}");
-            Console.WriteLine($"Owned Planet Id's: {string.Join(", ", gs.Planets.Where(p => p.OwnerId == MyId).Select(p =>  p.Id))}");
+            Console.WriteLine($"Owned Planet Id's: {string.Join(", ", gs.Planets.Where(p => p.OwnerId == MyId).Select(p => p.Id))}");
 
             // find the first planet we don't own
             var targetPlanet = gs.Planets.FirstOrDefault(p => p.OwnerId != MyId);
