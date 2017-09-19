@@ -42,7 +42,7 @@ class GameSession {
 
          GameSession._turnTimer = new ex.Timer(() => GameSession.updateSessionState(), GameSession.getTurnDuration(), true);
          GameSession.Game.add(GameSession._turnTimer);
-         GameSession.Game.add(new Chart(GameSession.Game.getWidth() / 2, Config.ChartOffsetY, Config.ChartWidth, Config.ChartHeight, Config.ChartBackground))
+         GameSession.Game.add(new Chart(Config.ChartOffsetX, Config.ChartOffsetY, Config.ChartWidth, Config.ChartHeight, Config.ChartBackground))
       });
 
    }
@@ -76,8 +76,8 @@ class GameSession {
       var vw = GameSession.Game.getWidth();
       var vh = GameSession.Game.getHeight();
 
-      x = ((vw / 2) - (Config.MapSize / 2)) + x;
-      y = ((vh / 2) - (Config.MapSize / 2)) + y;
+      x = ((vw / 2) - (Config.MapSize / 2)) + x + Config.MapOffsetX;
+      y = ((vh / 2) - (Config.MapSize / 2)) + y + Config.MapOffsetY;
 
       return new ex.Point(x, y);
    }

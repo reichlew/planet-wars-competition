@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace PlanetWars.Shared
+﻿namespace PlanetWars.Shared
 {
     public class BaseResult<T>
     {
@@ -23,7 +21,7 @@ namespace PlanetWars.Shared
             {
                 Success = false,
                 Message = message,
-                Errors = errors != null ? errors : null
+                Errors = errors != null ? errors : new string[] { }
             };
         }
     }

@@ -27,8 +27,9 @@ namespace PlanetWars.Server
         private static int _MAXID = 1;
         private int _MAXPLAYERID = 1;
         private int _MAXFLEETID = 0;
-        
-        public static readonly long START_DELAY = 30000; // ms
+
+        public static readonly long START_DELAY = 2000; // ms
+        public static readonly long MAX_WAIT = 60000; //ms
         public static readonly long PLAYER_TURN_LENGTH = 700; // ms
         public static readonly long SERVER_TURN_LENGTH = 200; // ms
         public static readonly int MAX_TURN = 200; // default 200 turns
@@ -60,24 +61,29 @@ namespace PlanetWars.Server
         private DateTime gameStart;
         private DateTime endPlayerTurn;
         private DateTime endServerTurn;
+        private DateTime gameQuit;
+
         public string Status { get; set; }
 
         private object synclock = new object();
+
         public Game(MapGenerationOption mapGeneration)
         {
             Id = _MAXID++;
 
             Turn = 0;
             Running = false;
+            Waiting = true;
             _gameLoop = new HighFrequencyTimer(60, this.Update);
             GenerateMap(mapGeneration);
 
-            UpdateTimeInfo(DateTime.UtcNow);
+            gameQuit = DateTime.UtcNow.AddMilliseconds(MAX_WAIT);
+            UpdateTimeInfo(DateTime.UtcNow.AddMilliseconds(START_DELAY));
         }
 
-        public void UpdateTimeInfo(DateTime currentTime)
+        public void UpdateTimeInfo(DateTime gameStart)
         {
-            gameStart = currentTime.AddMilliseconds(START_DELAY);
+            this.gameStart = gameStart;
             endPlayerTurn = gameStart.AddMilliseconds(PLAYER_TURN_LENGTH);
             endServerTurn = endPlayerTurn.AddMilliseconds(SERVER_TURN_LENGTH);
         }
@@ -203,34 +209,26 @@ namespace PlanetWars.Server
         public LogonResult LogonPlayer(string playerName)
         {
             var result = new LogonResult();
-            if (!Players.ContainsKey(playerName))
+            var newPlayer = new Player()
             {
-                var newPlayer = new Player()
-                {
-                    AuthToken = System.Guid.NewGuid().ToString(),
-                    PlayerName = playerName,
-                    Id = _MAXPLAYERID++
-                };
+                AuthToken = System.Guid.NewGuid().ToString(),
+                PlayerName = playerName,
+                Id = _MAXPLAYERID++
+            };
 
-                var playerAdded = Players.TryAdd(playerName, newPlayer);
-                var authTokenAdded = AuthTokens.TryAdd(newPlayer.AuthToken, newPlayer);
+            var playerAdded = Players.TryAdd(playerName + newPlayer.AuthToken, newPlayer);
+            var authTokenAdded = AuthTokens.TryAdd(newPlayer.AuthToken, newPlayer);
 
-                if (playerAdded && authTokenAdded)
-                {
-                    System.Diagnostics.Debug.WriteLine("Player logon [{0}]:[{1}]", newPlayer.PlayerName, newPlayer.AuthToken);
-                }
-
-                result.AuthToken = newPlayer.AuthToken;
-                result.Id = newPlayer.Id;
-                result.GameId = Id;
-                result.GameStart = this.gameStart;
-                result.Success = true;
-            }
-            else
+            if (playerAdded && authTokenAdded)
             {
-                System.Diagnostics.Debug.WriteLine("Player {0} already logged on!", playerName);
+                System.Diagnostics.Debug.WriteLine("Player logon [{0}]:[{1}]", newPlayer.PlayerName, newPlayer.AuthToken);
             }
+
+            result.AuthToken = newPlayer.AuthToken;
+            result.Id = newPlayer.Id;
             result.GameId = Id;
+            result.GameStart = this.gameStart;
+            result.Success = true;
 
             return result;
         }
@@ -275,17 +273,25 @@ namespace PlanetWars.Server
             {
                 if (currentTime > gameStart)
                 {
-                    this.Waiting = false;
+                    if (Players.Count == 2)
+                    {
+                        this.Waiting = false;
+                    }
+                    else
+                    {
+                        if (currentTime > gameQuit)
+                        {
+                            this.Waiting = false;
+                            this.Status = "Nobody joined your game, I guess that means you win.";
+                            GameOver = true;
+                        }
+                        else
+                        {
+                            UpdateTimeInfo(gameStart.AddSeconds(2));
+                        }
+                    }
                 }
                 return;
-            }
-            else
-            {
-                if (Players.Count != 2)
-                {
-                    this.Status = "Nobody joined your game, I guess that means you win.";
-                    GameOver = true;
-                }
             }
 
             if (GameOver)
@@ -382,7 +388,7 @@ namespace PlanetWars.Server
 
                 var player2NoPlanet = !Planets.Any(p => p.OwnerId == 2);
                 var player2NoShips = !Fleets.Any(f => f.OwnerId == 2);
-                
+
                 if (player1NoPlanets && player1NoShips)
                 {
                     // player 2 has won
@@ -444,6 +450,7 @@ namespace PlanetWars.Server
                 Success = true,
                 Status = this.Status,
                 IsGameOver = this.GameOver,
+                Waiting = this.Waiting,
                 CurrentTurn = Turn,
                 NextTurnStart = endServerTurn,
                 EndOfCurrentTurn = endPlayerTurn,

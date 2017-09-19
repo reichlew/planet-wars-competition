@@ -22,6 +22,7 @@ namespace PlanetWars.DemoAgent
 
         // string guid that acts as an authorization token, definitely not crypto secure
         public string AuthToken { get; set; }
+
         public string Name { get; set; }
         public int LastTurn { get; private set; }
         public int MyId { get; private set; }
@@ -102,26 +103,26 @@ namespace PlanetWars.DemoAgent
         public async Task Start()
         {
             await Logon();
-            if (!_isRunning)
+
+            while (true)
             {
-                _isRunning = true;
-                while (_isRunning)
+                if (TimeToNextTurn > 0)
                 {
-                    if (TimeToNextTurn > 0)
-                    {
-                        await Task.Delay((int)(TimeToNextTurn));
-                    }
+                    await Task.Delay((int)(TimeToNextTurn));
+                }
 
-                    var gs = await UpdateGameState();
-                    if (gs.IsGameOver)
-                    {
-                        _isRunning = false;
-                        Console.WriteLine("Game Over!");
-                        Console.WriteLine(gs.Status);
-                        _client.Dispose();
-                        break;
-                    }
+                var gs = await UpdateGameState();
 
+                if (gs.IsGameOver)
+                {
+                    Console.WriteLine("Game Over!");
+                    Console.WriteLine(gs.Status);
+                    _client.Dispose();
+                    break;
+                }
+
+                if (!gs.Waiting)
+                {
                     Update(gs);
                     var ur = await SendUpdate(this._pendingMoveRequests);
                     this._pendingMoveRequests.Clear();

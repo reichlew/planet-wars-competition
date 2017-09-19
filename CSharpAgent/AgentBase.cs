@@ -9,7 +9,6 @@ namespace CSharpAgent
 {
     public class AgentBase
     {
-        private bool _isRunning = false;
         private readonly HttpClient _client = null;
 
         private List<MoveRequest> _pendingMoveRequests = new List<MoveRequest>();
@@ -115,26 +114,26 @@ namespace CSharpAgent
         public async Task Start()
         {
             await Logon();
-            if (!_isRunning)
+
+            while (true)
             {
-                _isRunning = true;
-                while (_isRunning)
+                if (TimeToNextTurn > 0)
                 {
-                    if (TimeToNextTurn > 0)
-                    {
-                        await Task.Delay((int)(TimeToNextTurn));
-                    }
+                    await Task.Delay((int)(TimeToNextTurn));
+                }
 
-                    var gs = await UpdateGameState();
-                    if (gs.IsGameOver)
-                    {
-                        _isRunning = false;
-                        Console.WriteLine("Game Over!");
-                        Console.WriteLine(gs.Status);
-                        _client.Dispose();
-                        break;
-                    }
+                var gs = await UpdateGameState();
 
+                if (gs.IsGameOver)
+                {
+                    Console.WriteLine("Game Over!");
+                    Console.WriteLine(gs.Status);
+                    _client.Dispose();
+                    break;
+                }
+
+                if (!gs.Waiting)
+                {
                     Update(gs);
                     var ur = await SendUpdate(this._pendingMoveRequests);
                     this._pendingMoveRequests.Clear();
