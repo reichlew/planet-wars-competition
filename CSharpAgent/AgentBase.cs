@@ -132,9 +132,12 @@ namespace CSharpAgent
                     break;
                 }
 
-                Update(gs);
-                var ur = await SendUpdate(this._pendingMoveRequests);
-                this._pendingMoveRequests.Clear();
+                if (!gs.Waiting)
+                {
+                    Update(gs);
+                    var ur = await SendUpdate(this._pendingMoveRequests);
+                    this._pendingMoveRequests.Clear();
+                }
             }
         }
 
