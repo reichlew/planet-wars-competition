@@ -27,6 +27,7 @@
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
     <TypeScriptToolsVersion>2.2</TypeScriptToolsVersion>
+    <Use64BitIISExpress />
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
@@ -169,6 +170,7 @@
     <Compile Include="Areas\HelpPage\XmlDocumentationProvider.cs" />
     <Compile Include="Controllers\HomeController.cs" />
     <Compile Include="Controllers\GamesController.cs" />
+    <Compile Include="DemoAgent\AdvancedAgent.cs" />
     <Compile Include="DemoAgent\Agent.cs" />
     <Compile Include="DemoAgent\AgentBase.cs" />
     <Compile Include="Global.asax.cs">
@@ -181,6 +183,7 @@
     <Compile Include="Server\Game.cs" />
     <Compile Include="Server\GameManager.cs" />
     <Compile Include="Server\HighFrequencyTimer.cs" />
+    <Compile Include="Server\MapGenerator.cs" />
     <Compile Include="Server\Planet.cs" />
     <Compile Include="Server\Player.cs" />
     <Compile Include="Utility\MappingExtensions.cs" />

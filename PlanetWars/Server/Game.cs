@@ -1,32 +1,31 @@
-﻿using AutoMapper;
-using PlanetWars.Shared;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Web;
+using AutoMapper;
 using PlanetWars.DemoAgent;
+using PlanetWars.Shared;
 
 namespace PlanetWars.Server
 {
     public interface IGame
     {
         LogonResult LogonPlayer(string playerName);
+
         void Update(DateTime currentTime);
+
         void Start();
+
         void Stop();
     }
 
     public class Game : IGame
     {
-
-        // todo planet generation
-
         private static int _MAXID = 1;
         private int _MAXPLAYERID = 1;
-        private int _MAXPLANETID = 0;
         private int _MAXFLEETID = 0;
         
         public static readonly long START_DELAY = 30000; // ms
@@ -34,10 +33,11 @@ namespace PlanetWars.Server
         public static readonly long SERVER_TURN_LENGTH = 200; // ms
         public static readonly int MAX_TURN = 200; // default 200 turns
 
+        private readonly MapGenerator mapGenerator = new MapGenerator();
+
         public static bool IsRunningLocally = HttpContext.Current.Request.IsLocal;
         public bool Running { get; private set; }
         public int Id { get; private set; }
-        public Random Random { get; set; }
         public int Turn { get; private set; }
         public bool Waiting { get; internal set; }
         public bool GameOver { get; private set; }
@@ -63,33 +63,14 @@ namespace PlanetWars.Server
         public string Status { get; set; }
 
         private object synclock = new object();
-        
-        public Game(int? seed, int? id) : base()
+        public Game(MapGenerationOption mapGeneration)
         {
-            if (seed != null && seed.HasValue)
-            {
-                Random = new Random(seed.Value);
-            }
-
-            if (id != null && id.HasValue)
-            {
-                Id = id.Value;
-            }
-        }
-
-        public Game()
-        {
-            if (Random == null)
-            {
-                Random = new Random();
-            }
-
             Id = _MAXID++;
 
             Turn = 0;
             Running = false;
             _gameLoop = new HighFrequencyTimer(60, this.Update);
-            GenerateMap();
+            GenerateMap(mapGeneration);
 
             UpdateTimeInfo(DateTime.UtcNow);
         }
@@ -116,82 +97,18 @@ namespace PlanetWars.Server
             return this._fleets;
         }
 
-        private void GenerateMap()
+        private void GenerateMap(MapGenerationOption mapGeneration)
         {
-            
-            _planets.Add(new Planet()
-            {
-                Id = _MAXPLANETID++,
-                OwnerId = -1,
-                Position = new Point(0, 0),
-                NumberOfShips = 40,
-                GrowthRate = 5
-            });
-
-            _planets.Add(new Planet()
-            {
-                Id = _MAXPLANETID++,
-                OwnerId = -1,
-                Position = new Point(2, 2),
-                NumberOfShips = 10,
-                GrowthRate = 2
-            });
-
-            _planets.Add(new Planet()
-            {
-                Id = _MAXPLANETID++,
-                OwnerId = -1,
-                Position = new Point(8, 0),
-                NumberOfShips = 20,
-                GrowthRate = 3
-            });
-           
-            _planets.Add(new Planet()
-            {
-                Id = _MAXPLANETID++,
-                OwnerId = -1,
-                Position = new Point(0, 8),
-                NumberOfShips = 20,
-                GrowthRate = 3
-            });
-            _planets.Add(new Planet()
-            {
-                Id = _MAXPLANETID++,
-                OwnerId = -1,
-                Position = new Point(4, 4),
-                NumberOfShips = 100,
-                GrowthRate = 7
-            });
-
-            _planets.Add(new Planet()
-            {
-                Id = _MAXPLANETID++,
-                OwnerId = -1,
-                Position = new Point(6, 6),
-                NumberOfShips = 10,
-                GrowthRate = 2
-            });
-
-            _planets.Add(new Planet()
-            {
-                Id = _MAXPLANETID++,
-                OwnerId = -1,
-                Position = new Point(8, 8),
-                NumberOfShips = 40,
-                GrowthRate = 5
-            });
-
-            _planets[0].OwnerId = 1;
-            _planets[_planets.Count - 1].OwnerId = 2;
+            _planets = mapGenerator.GenerateMap(mapGeneration);
         }
-        
+
         public MoveResult MoveFleet(MoveRequest request)
         {
-
             var result = new MoveResult();
-            
+
             // non-zero ships
-            if(request.NumberOfShips <= 0) {
+            if (request.NumberOfShips <= 0)
+            {
                 result.Success = false;
                 result.Message = "Can't send a zero fleet";
                 return result;
@@ -204,7 +121,6 @@ namespace PlanetWars.Server
 
             // A planet of the requested destination ID exists
             var destinationValid = Planets.FirstOrDefault(p => p.Id == request.DestinationPlanetId);
-
 
             if (sourceValid != null && destinationValid != null)
             {
@@ -236,7 +152,6 @@ namespace PlanetWars.Server
                 result.Message = "Invalid move command, check if the planet of the requested source/dest ID exists, belongs to that player, AND it has enough ships.";
             }
 
-
             return result;
         }
 
@@ -251,7 +166,6 @@ namespace PlanetWars.Server
             {
                 throw new ArgumentException("Invalid auth token, no player exists for that auth token!!!!");
             }
-
         }
 
         private IEnumerable<Planet> _getPlanetsForPlayer(string authToken)
@@ -321,14 +235,26 @@ namespace PlanetWars.Server
             return result;
         }
 
-        public void StartDemoAgent(string playerName, int gameId)
+        public void StartDemoAgent(string playerName, int gameId, bool advanced)
         {
-            var agentTask = Task.Factory.StartNew(async () =>
+            if (advanced)
             {
-                string endpoint = "http://localhost/planetwars/";
-                var sweetDemoAgent = new Agent(playerName, endpoint, gameId);
-                await sweetDemoAgent.Start();
-            });
+                var agentTask = Task.Factory.StartNew(async () =>
+                {
+                    string endpoint = "http://localhost/planetwars/";
+                    var sweetDemoAgent = new AdvancedAgent(playerName, endpoint, gameId);
+                    await sweetDemoAgent.Start();
+                });
+            }
+            else
+            {
+                var agentTask = Task.Factory.StartNew(async () =>
+                {
+                    string endpoint = "http://localhost/planetwars/";
+                    var sweetDemoAgent = new Agent(playerName, endpoint, gameId);
+                    await sweetDemoAgent.Start();
+                });
+            }
         }
 
         public void Start()
@@ -342,7 +268,6 @@ namespace PlanetWars.Server
             Running = false;
             _gameLoop.Stop();
         }
-
 
         public void Update(DateTime currentTime)
         {
@@ -372,7 +297,7 @@ namespace PlanetWars.Server
             // check if we are in the server window
             if (currentTime >= endPlayerTurn)
             {
-                // server processing                
+                // server processing
                 Processing = true;
 
                 // Grow ships on planets
@@ -385,21 +310,21 @@ namespace PlanetWars.Server
                     }
                 }
 
-                // Send fleets 
+                // Send fleets
                 foreach (var fleet in Fleets)
                 {
                     // travel 1 unit distance each turn
                     fleet.NumberOfTurnsToDestination--;
-                }               
-               
+                }
+
                 // Resolve planet battles
-                foreach(var planet in Planets)
+                foreach (var planet in Planets)
                 {
                     var combatants = new Dictionary<int, int>();
                     combatants.Add(planet.OwnerId, planet.NumberOfShips);
                     // find fleets destined for this planet
                     var fleets = Fleets.Where(f => f.Destination.Id == planet.Id && f.NumberOfTurnsToDestination <= 0);
-                    foreach(var fleet in fleets)
+                    foreach (var fleet in fleets)
                     {
                         if (combatants.ContainsKey(fleet.OwnerId))
                         {
@@ -411,18 +336,18 @@ namespace PlanetWars.Server
                         }
                     }
 
-                    if(fleets.Count() <= 0)
+                    if (fleets.Count() <= 0)
                     {
                         continue;
                     }
 
                     KeyValuePair<int, int> second = new KeyValuePair<int, int>(1, 0);
                     KeyValuePair<int, int> winner = new KeyValuePair<int, int>(2, 0);
-                    foreach(var keyval in combatants)
+                    foreach (var keyval in combatants)
                     {
-                        if(keyval.Value > second.Value)
+                        if (keyval.Value > second.Value)
                         {
-                            if(keyval.Value > winner.Value)
+                            if (keyval.Value > winner.Value)
                             {
                                 second = winner;
                                 winner = keyval;
@@ -430,11 +355,11 @@ namespace PlanetWars.Server
                             else
                             {
                                 second = keyval;
-                            }                            
+                            }
                         }
                     }
 
-                    if(winner.Value > second.Value)
+                    if (winner.Value > second.Value)
                     {
                         planet.NumberOfShips = winner.Value - second.Value;
                         planet.OwnerId = winner.Key;
@@ -467,7 +392,7 @@ namespace PlanetWars.Server
                     this.GameOver = true;
                 }
 
-                 if (player2NoPlanet && player2NoShips)
+                if (player2NoPlanet && player2NoShips)
                 {
                     // player 1 has won
                     var winner = Players.Values.FirstOrDefault(p => p.Id == 1);
@@ -486,7 +411,6 @@ namespace PlanetWars.Server
                 Processing = false;
                 System.Diagnostics.Debug.WriteLine($"Game {Id} : Turn {Turn} : Next Turn Start {endServerTurn.Subtract(DateTime.UtcNow).TotalMilliseconds}ms");
             }
-
 
             if (Turn >= MAX_TURN)
             {
