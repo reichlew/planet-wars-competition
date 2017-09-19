@@ -18,6 +18,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpAgent", "CSharpAgent\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PlanetWars.Shared", "PlanetWars.Shared\PlanetWars.Shared.csproj", "{DCFFF982-65A4-478B-AD3C-F22609BC5FDE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CSharpAgent20", "CSharpAgent20\CSharpAgent20.csproj", "{4303B037-314D-4342-A481-25697235A1A2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,6 +42,10 @@ Global
 		{DCFFF982-65A4-478B-AD3C-F22609BC5FDE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DCFFF982-65A4-478B-AD3C-F22609BC5FDE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DCFFF982-65A4-478B-AD3C-F22609BC5FDE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4303B037-314D-4342-A481-25697235A1A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4303B037-314D-4342-A481-25697235A1A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4303B037-314D-4342-A481-25697235A1A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4303B037-314D-4342-A481-25697235A1A2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

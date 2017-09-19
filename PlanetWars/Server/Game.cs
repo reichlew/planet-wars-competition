@@ -63,7 +63,6 @@ namespace PlanetWars.Server
         public string Status { get; set; }
 
         private object synclock = new object();
-
         public Game(MapGenerationOption mapGeneration)
         {
             Id = _MAXID++;
