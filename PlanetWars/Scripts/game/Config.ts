@@ -2,7 +2,9 @@
 
    // Map Size
    MapPadding: 50, // padding around edge of map, inside will be "drawable" space for planets
-   MapSize: 400,
+   MapSize: 600,
+   MapOffsetX: 160,
+   MapOffsetY: -30,
 
    // Starfield
    StarfieldSize: 1000,
@@ -23,9 +25,10 @@
    FleetAnimSpeed: 400,
    
    // chart
-   ChartWidth: 500,
-   ChartHeight: 120,
-   ChartOffsetY: 100,
+   ChartWidth: 310,
+   ChartHeight: 100,
+   ChartOffsetX: 160,
+   ChartOffsetY: 300,
    ChartBackground: ex.Color.fromRGB(255, 255, 255, 0.2), 
 
    //
@@ -33,8 +36,8 @@
    //
 
    // Size of planet * factor = world size
-   PlanetMinSize: 25,
-   PlanetMaxSize: 120,
+   PlanetMinSize: 20,
+   PlanetMaxSize: 100,
    PlanetNeutralColor: ex.Color.Gray,
 
    //

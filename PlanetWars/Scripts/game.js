@@ -43,7 +43,9 @@ var Chart = (function (_super) {
 }(ex.Actor));
 var Config = {
     MapPadding: 50,
-    MapSize: 400,
+    MapSize: 600,
+    MapOffsetX: 160,
+    MapOffsetY: -30,
     StarfieldSize: 1000,
     StarfieldMinFade: 0.2,
     StarfieldMaxFade: 0.7,
@@ -56,12 +58,13 @@ var Config = {
     FleetWidth: 6,
     FleetHeight: 7,
     FleetAnimSpeed: 400,
-    ChartWidth: 500,
-    ChartHeight: 120,
-    ChartOffsetY: 100,
+    ChartWidth: 310,
+    ChartHeight: 100,
+    ChartOffsetX: 160,
+    ChartOffsetY: 300,
     ChartBackground: ex.Color.fromRGB(255, 255, 255, 0.2),
-    PlanetMinSize: 25,
-    PlanetMaxSize: 120,
+    PlanetMinSize: 20,
+    PlanetMaxSize: 100,
     PlanetNeutralColor: ex.Color.Gray,
     PlayerAColor: ex.Color.fromHex("#c53e30"),
     PlayerBColor: ex.Color.fromHex("#3797bf")
@@ -187,7 +190,7 @@ var GameSession = (function () {
         GameSession.updateSessionState().then(function () {
             GameSession._turnTimer = new ex.Timer(function () { return GameSession.updateSessionState(); }, GameSession.getTurnDuration(), true);
             GameSession.Game.add(GameSession._turnTimer);
-            GameSession.Game.add(new Chart(GameSession.Game.getWidth() / 2, Config.ChartOffsetY, Config.ChartWidth, Config.ChartHeight, Config.ChartBackground));
+            GameSession.Game.add(new Chart(Config.ChartOffsetX, Config.ChartOffsetY, Config.ChartWidth, Config.ChartHeight, Config.ChartBackground));
         });
     };
     GameSession.mapPlanetSize = function (growthRate) {
@@ -207,8 +210,8 @@ var GameSession = (function () {
         var y = (sfy * Config.MapSize);
         var vw = GameSession.Game.getWidth();
         var vh = GameSession.Game.getHeight();
-        x = ((vw / 2) - (Config.MapSize / 2)) + x;
-        y = ((vh / 2) - (Config.MapSize / 2)) + y;
+        x = ((vw / 2) - (Config.MapSize / 2)) + x + Config.MapOffsetX;
+        y = ((vh / 2) - (Config.MapSize / 2)) + y + Config.MapOffsetY;
         return new ex.Point(x, y);
     };
     GameSession.updateSessionState = function () {
