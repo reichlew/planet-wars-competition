@@ -60,41 +60,34 @@ namespace PlanetWars.Server
 
         public LogonResult Execute(LogonRequest request)
         {
-            if (request.GameId == -2)
+            Game game;
+
+            switch (request.GameId)
             {
-                var game = GetNewGame(request);
-                game.Waiting = true;
-                game.Start();
-                game.StartDemoAgent("Advanced CPU", game.Id, true);
-                return game.LogonPlayer(request.AgentName);
-            }
-            else if (request.GameId == -1)
-            {
-                var game = GetNewGame(request);
-                game.Waiting = true;
-                game.Start();
-                game.StartDemoAgent("CPU", game.Id, false);
-                return game.LogonPlayer(request.AgentName);
-            }
-            else if (request.GameId == 0)
-            {
-                var game = GetNewGame(request);
-                game.Waiting = true;
-                game.Start();
-                return game.LogonPlayer(request.AgentName);
-            }
-            else
-            {
-                var game = GetWaitingGameById(request.GameId);
-                if (game != null)
-                {
-                    game.Waiting = false;
+                case -2:
+                    game = GetNewGame(request);
+                    game.Start();
+                    game.StartDemoAgent("Advanced CPU", game.Id, true);
                     return game.LogonPlayer(request.AgentName);
-                }
-                else
-                {
-                    return new LogonResult() { Id = request.GameId, Success = false, Message = "The game id specified is not available." };
-                }
+                case -1:
+                    game = GetNewGame(request);
+                    game.Start();
+                    game.StartDemoAgent("CPU", game.Id, false);
+                    return game.LogonPlayer(request.AgentName);
+                case 0:
+                    game = GetNewGame(request);
+                    game.Start();
+                    return game.LogonPlayer(request.AgentName);
+                default:
+                    game = GetWaitingGameById(request.GameId);
+                    if (game != null)
+                    {
+                        return game.LogonPlayer(request.AgentName);
+                    }
+                    else
+                    {
+                        return new LogonResult() { Id = request.GameId, Success = false, Message = "The game id specified is not available.", Errors = new string[] { } };
+                    }
             }
         }
 
