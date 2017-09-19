@@ -75,7 +75,7 @@ namespace PlanetWars.Server
                 Id = planetId++,
                 OwnerId = -1,
                 Position = new Point(4, 4),
-                NumberOfShips = 100,
+                NumberOfShips = 50,
                 GrowthRate = 7
             });
 
@@ -123,7 +123,7 @@ namespace PlanetWars.Server
                     OwnerId = -1,
                     Position = potentialPoints[planetPoint],
                     NumberOfShips = randomizer.Next(10, 51),
-                    GrowthRate = randomizer.Next(2, 6)
+                    GrowthRate = randomizer.Next(2, 8)
                 });
 
                 potentialPoints.RemoveAt(planetPoint);
