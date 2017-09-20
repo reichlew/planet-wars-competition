@@ -67,12 +67,12 @@ namespace PlanetWars.Server
                 case -2:
                     game = GetNewGame(request);
                     game.Start();
-                    game.StartDemoAgent("Advanced CPU", game.Id, true);
+                    game.StartDemoAgent(game.Id, true);
                     return game.LogonPlayer(request.AgentName);
                 case -1:
                     game = GetNewGame(request);
                     game.Start();
-                    game.StartDemoAgent("CPU", game.Id, false);
+                    game.StartDemoAgent(game.Id, false);
                     return game.LogonPlayer(request.AgentName);
                 case 0:
                     game = GetNewGame(request);
