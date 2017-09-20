@@ -18,7 +18,7 @@
     <AssemblyName>PlanetWars</AssemblyName>
     <TargetFrameworkVersion>v4.6.1</TargetFrameworkVersion>
     <MvcBuildViews>false</MvcBuildViews>
-    <UseIISExpress>false</UseIISExpress>
+    <UseIISExpress>true</UseIISExpress>
     <IISExpressSSLPort />
     <IISExpressAnonymousAuthentication />
     <IISExpressWindowsAuthentication />
@@ -172,7 +172,6 @@
     <Compile Include="Controllers\GamesController.cs" />
     <Compile Include="DemoAgent\AdvancedAgent.cs" />
     <Compile Include="DemoAgent\Agent.cs" />
-    <Compile Include="DemoAgent\AgentBase.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
