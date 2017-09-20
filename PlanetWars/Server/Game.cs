@@ -233,14 +233,13 @@ namespace PlanetWars.Server
             return result;
         }
 
-        public void StartDemoAgent(string playerName, int gameId, bool advanced)
+        public void StartDemoAgent(int gameId, bool advanced)
         {
             if (advanced)
             {
                 var agentTask = Task.Factory.StartNew(async () =>
                 {
-                    string endpoint = "http://localhost/planetwars/";
-                    var sweetDemoAgent = new AdvancedAgent(playerName, endpoint, gameId);
+                    var sweetDemoAgent = new AdvancedAgent(gameId);
                     await sweetDemoAgent.Start();
                 });
             }
@@ -248,8 +247,7 @@ namespace PlanetWars.Server
             {
                 var agentTask = Task.Factory.StartNew(async () =>
                 {
-                    string endpoint = "http://localhost/planetwars/";
-                    var sweetDemoAgent = new Agent(playerName, endpoint, gameId);
+                    var sweetDemoAgent = new Agent(gameId);
                     await sweetDemoAgent.Start();
                 });
             }

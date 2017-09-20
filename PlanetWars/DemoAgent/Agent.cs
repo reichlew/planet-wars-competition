@@ -8,7 +8,9 @@ namespace PlanetWars.DemoAgent
 {
     public class Agent : AgentBase
     {
-        public Agent(string name, string endpoint, int gameId) : base(name, endpoint, gameId) { }
+        public Agent(int gameId) : base("CPU", gameId, MapGenerationOption.None)
+        {
+        }
 
         public override void Update(StatusResult gs)
         {

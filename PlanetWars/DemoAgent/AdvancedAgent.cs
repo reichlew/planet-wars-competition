@@ -8,7 +8,7 @@ namespace PlanetWars.DemoAgent
 {
     public class AdvancedAgent : AgentBase
     {
-        public AdvancedAgent(string name, string endpoint, int gameId) : base(name, endpoint, gameId)
+        public AdvancedAgent(int gameId) : base("ADVANCED CPU", gameId, MapGenerationOption.None)
         {
         }
 

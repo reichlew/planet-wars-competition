@@ -1,17 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Threading.Tasks;
-using System.Web;
-using PlanetWars.Shared;
 
-namespace PlanetWars.DemoAgent
+namespace PlanetWars.Shared
 {
     public class AgentBase
     {
-        private bool _isRunning = false;
         private readonly HttpClient _client = null;
 
         private List<MoveRequest> _pendingMoveRequests = new List<MoveRequest>();
@@ -19,6 +15,7 @@ namespace PlanetWars.DemoAgent
         protected long TimeToNextTurn { get; set; }
         protected int CurrentTurn { get; set; }
         protected int GameId { get; set; }
+        protected MapGenerationOption MapGeneration { get; set; }
 
         // string guid that acts as an authorization token, definitely not crypto secure
         public string AuthToken { get; set; }
@@ -27,12 +24,13 @@ namespace PlanetWars.DemoAgent
         public int LastTurn { get; private set; }
         public int MyId { get; private set; }
 
-        public AgentBase(string name, string endpoint, int gameId)
+        public AgentBase(string name, int gameId, MapGenerationOption mapGeneration)
         {
             Name = name;
             GameId = gameId;
-            // connect to api and handle gzip compressed messasges
-            _client = new HttpClient() { BaseAddress = new Uri(endpoint) };
+            MapGeneration = mapGeneration;
+
+            _client = new HttpClient() { BaseAddress = new Uri("http://localhost/PlanetWars/") };
             _client.DefaultRequestHeaders.Accept.Clear();
             _client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
         }
@@ -55,19 +53,22 @@ namespace PlanetWars.DemoAgent
             var response = await _client.PostAsJsonAsync("api/logon", new LogonRequest()
             {
                 AgentName = Name,
-                GameId = GameId
+                GameId = GameId,
+                MapGeneration = MapGeneration
             });
+
             var result = await response.Content.ReadAsAsync<LogonResult>();
             if (!result.Success)
             {
-                Console.WriteLine($"Error talking to server {result.Message}");
+                Console.WriteLine($"Error talking to server: {result.Message}, {string.Join(",", result.Errors)}");
                 throw new Exception("Could not talk to sever");
             }
+
             AuthToken = result.AuthToken;
             GameId = result.GameId;
             MyId = result.Id;
             TimeToNextTurn = (long)result.GameStart.Subtract(DateTime.UtcNow).TotalMilliseconds;
-            Console.WriteLine($"Your game Id is {result.GameId} auth {result.AuthToken} and starts in {TimeToNextTurn}ms");
+            Console.WriteLine($"Logged in as {Name}: Game Id {result.GameId} starts in {TimeToNextTurn}ms");
             return result;
         }
 
@@ -77,12 +78,14 @@ namespace PlanetWars.DemoAgent
             {
                 GameId = GameId
             });
+
             var result = await response.Content.ReadAsAsync<StatusResult>();
             if (!result.Success)
             {
-                Console.WriteLine($"Error talking to server {result.Message}");
+                Console.WriteLine($"Error talking to server: {result.Message}, {string.Join(",", result.Errors)}");
                 throw new Exception("Could not talk to sever");
             }
+
             TimeToNextTurn = (long)result.NextTurnStart.Subtract(DateTime.UtcNow).TotalMilliseconds;
             CurrentTurn = result.CurrentTurn;
             Console.WriteLine($"Next turn in {TimeToNextTurn}ms");
@@ -95,7 +98,14 @@ namespace PlanetWars.DemoAgent
             var results = await response.Content.ReadAsAsync<List<MoveResult>>();
             foreach (var result in results)
             {
-                Console.WriteLine(result.Message);
+                if (result.Message == "Failure")
+                {
+                    Console.WriteLine($"Error talking to server: {result.Message}, {string.Join(",", result.Errors)}");
+                }
+                else
+                {
+                    Console.WriteLine(result.Message);
+                }
             }
             return results;
         }
